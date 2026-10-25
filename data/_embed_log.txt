@@ -1,7 +1,0 @@
-160/10408 speed=0.5ch/s eta=350min
-320/10408 speed=0.5ch/s eta=344min
-480/10408 speed=0.5ch/s eta=348min
-640/10408 speed=0.5ch/s eta=340min
-800/10408 speed=0.2ch/s eta=936min
-960/10408 speed=0.2ch/s eta=816min
-1120/10408 speed=4.5ch/s eta=34min

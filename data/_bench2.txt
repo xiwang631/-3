@@ -1,3 +1,0 @@
-fp32 batch=8 maxlen=512: 37.2s for 16 -> 0.43 ch/s
-int8 batch=8 maxlen=512: 38.8s for 16 -> 0.41 ch/s
-int8 batch=16 maxlen=512: 40.2s for 16 -> 0.40 ch/s

@@ -1,1 +1,0 @@
-model=BAAI/bge-m3 done=10408/10408
