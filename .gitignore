@@ -1,0 +1,13 @@
+# 密钥
+.env
+
+# 大文件(原始数据与产物, 交作业时另行打包或放网盘)
+data/reports/
+data/extracted/
+data/chunks.jsonl
+data/embeddings.npy
+data/bm25_index.pkl
+
+# Python
+__pycache__/
+*.pyc

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 1.6cm 1.8cm; }
+  body { font-family: "Microsoft YaHei", "微软雅黑", sans-serif; font-size: 10.5pt; color: #1a1a2e; line-height: 1.55; }
+  h1 { font-size: 17pt; margin: 0 0 2px; color: #16324f; }
+  .sub { color: #5a6a7a; font-size: 9.5pt; margin-bottom: 10px; }
+  .box { border: 1.5px solid #16324f; border-radius: 6px; padding: 8px 12px; margin: 8px 0; background: #f4f8fb; }
+  .box b { color: #16324f; }
+  h2 { font-size: 12pt; color: #16324f; border-left: 4px solid #2e86ab; padding-left: 8px; margin: 12px 0 6px; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.5pt; margin: 6px 0; }
+  th, td { border: 1px solid #b9c6d2; padding: 4px 7px; text-align: left; vertical-align: top; }
+  th { background: #e3edf5; color: #16324f; }
+  .ok { color: #1a7f37; font-weight: bold; }
+  .bad { color: #c0392b; font-weight: bold; }
+  ul { margin: 4px 0 4px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .foot { color: #7a8a99; font-size: 8.5pt; margin-top: 10px; border-top: 1px solid #ccd; padding-top: 6px; }
+</style>
+</head>
+<body>
+
+<h1>上市公司财报问答知识库 · 一页结论</h1>
+<div class="sub">方向 A ｜ 10 家医药公司 2025 年年报 ｜ 向量(bge-m3) + BM25 双路检索 + DeepSeek 带出处作答</div>
+
+<div class="box">
+<b>一句话结论：</b>同一批财报，<b>「查数字、找口径、单公司事实」类问题适合建库</b>——答案必须可溯源、数字不容编造，检索系统的「带出处、不瞎说」恰好对症；而问题侧换词泛化（自营 vs 直销）和多实体并列召回是它的短板，需要图谱或查询改写补足。
+</div>
+
+<h2>系统规模</h2>
+<ul>
+<li>10 份年报全文（巨潮资讯）→ 约 470 万字正文 + 3,583 张表格（行列结构还原）→ <b>10,408 个知识块</b>（800 字 / 重合 120 / 句末收尾，块带公司·章节·页码标签，六大报表块带合并/母公司口径标签）</li>
+<li>双路检索：bge-m3 向量（公司名+章节名拼入向量化文本）＋ jieba 金融词表 BM25，各取 Top20 → RRF 合并 Top5；问题先经 LLM 精炼（语义路）+ 抽关键词（关键词路）</li>
+</ul>
+
+<h2>10 题评估结果（每题检索召回与作答全文见 eval_results.md）</h2>
+<table>
+<tr><th style="width:34%">题型</th><th style="width:14%">结果</th><th>代表案例</th></tr>
+<tr><td>单公司事实（5 题：营收/净利/现金流/研发占比/销售费用）</td><td><span class="ok">5/5 对</span></td><td>药明康德研发占比 2.46% —— 反直觉但与年报原文一致（CXO 客户资助研发计入成本），系统没有「想当然」</td></tr>
+<tr><td>跨公司比较（2 题）</td><td><span class="ok">1 对</span> / <span class="bad">1 拒答</span></td><td>恒瑞 87.24 亿 vs 复星约 59 亿 研发投入，答对且注明口径；迈瑞 vs 联影题只召回了迈瑞一侧，模型如实说「信息不足」</td></tr>
+<tr><td>口径陷阱（母公司 vs 合并）</td><td><span class="ok">1/1 对</span></td><td>「恒瑞<b>母公司</b>货币资金」准确命中母公司资产负债表（395.91 亿），未混入合并口径</td></tr>
+<tr><td>换词陷阱（自营 vs 直销）</td><td><span class="bad">0/1</span></td><td>原文用「直销」，检索未把「自营」对齐，模型诚实拒答、未编造</td></tr>
+</table>
+
+<h2>哪类答得好、哪类翻车、为什么</h2>
+<table>
+<tr><th style="width:50%">答得好：带明确实体+指标的数字题</th><th>翻车：检索召回失败类（4 题中 3 题为拒答而非答错）</th></tr>
+<tr><td>块级「公司+章节+页码」标签让出处可追溯；表格行列还原保住了数字（期间修复了 PyMuPDF 搅乱千分位数字、无边框报表取不到表两类解析坑）；模型被约束为「片段不足即拒答」，<b>10 题零编造</b>——答错的代价被转化成了「承认不知道」。</td>
+<td>① 跨公司题双实体只召回一侧（向量路被「主要实体」主导）；② 同义换词超出字面匹配能力（BM25 打不中，向量在短语级也漂移）；③ 个别答案块元数据缺失（section「未知」页码空，为隔离 PyMuPDF 段错误的降级产物）。改进方向：查询改写/同义词典、双实体强制分组召回、图谱补足。</td></tr>
+</table>
+
+<h2>两类方案对比的小结（对应作业核心问题）</h2>
+<ul>
+<li><b>建库（本作业）赢在可信与可溯源</b>：知识可随时更新（换年报重跑即可）、每个数字能回到原文页码、拒答机制保证不出戏——凡是「要在真实业务里用」的场景，这些比流畅更重要。</li>
+<li><b>微调赢在语气与格式内化</b>：适合「董秘口径」这类风格/话术类需求，但它无法保证数字新、出处准，且知识更新要重训。二者不互斥：微调管「怎么说」，建库管「说什么」。</li>
+</ul>
+
+<div class="foot">技术栈：PyMuPDF + pdfplumber（提取/表格还原）· jieba + rank_bm25 + bge-m3（检索）· DeepSeek API（问题改写与作答）· Streamlit（问答页面）· 评估：10 题（2 跨公司 + 1 口径陷阱 + 1 换词陷阱），逐题记录召回块/答案/错因。核验方式：答案数字逐个放回知识库原文对证。</div>
+
+</body>
+</html>

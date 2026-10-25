@@ -1,0 +1,6 @@
+dtype=float32 batch=8 maxlen=512: 20.9s for 16 chunks -> 0.77 ch/s, dim=1024
+dtype=float32 batch=16 maxlen=512: 42.1s for 16 chunks -> 0.38 ch/s, dim=1024
+dtype=float32 batch=8 maxlen=1024: 23.4s for 16 chunks -> 0.68 ch/s, dim=1024
+dtype=bfloat16 batch=8 maxlen=512: 115.4s for 16 chunks -> 0.14 ch/s, dim=1024
+dtype=bfloat16 batch=16 maxlen=512: 231.8s for 16 chunks -> 0.07 ch/s, dim=1024
+dtype=bfloat16 batch=8 maxlen=1024: 132.2s for 16 chunks -> 0.12 ch/s, dim=1024

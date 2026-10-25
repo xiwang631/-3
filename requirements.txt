@@ -1,0 +1,7 @@
+pymupdf
+pdfplumber
+jieba
+rank_bm25
+numpy
+requests
+streamlit
